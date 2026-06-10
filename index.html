@@ -1,101 +1,784 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+'use client'
 
-<title>MedLongevity Biotech</title>
+import React, { useState } from 'react'
+import { 
+  Globe, 
+  ArrowRight, 
+  CheckCircle2, 
+  Beaker, 
+  Users, 
+  Building, 
+  GraduationCap, 
+  ChevronRight, 
+  ShieldCheck, 
+  FlaskConical, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Menu, 
+  X 
+} from 'lucide-react'
 
-<style>
-
-body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:linear-gradient(135deg,#03152b,#051f3b,#0b3d63);
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-color:white;
-text-align:center;
+// DIZIONARIO DI TRADUZIONE MULTILINGUA
+const translations = {
+  it: {
+    nav: {
+      services: "Servizi",
+      model: "Il Modello",
+      team: "Team",
+      network: "Network",
+      contact: "Contattaci",
+    },
+    hero: {
+      tagline: "ECCELLENZA SCIENTIFICA & INNOVAZIONE BIOTECH",
+      title: "Colmiamo il divario tra la ricerca accademica e il mondo produttivo",
+      subtitle: "MedLongevity Biotech Srls offre servizi di validazione scientifica indipendente per imprese e gruppi di ricerca attivi nei comparti agroalimentare, nutraceutico, farmaceutico, cosmetico e ambientale.",
+      ctaPrimary: "Richiedi una Consulenza",
+      ctaSecondary: "Scopri il Modello biologico",
+    },
+    valueProp: {
+      title: "Il Nostro Valore Fondamentale",
+      subtitle: "Trasformiamo protocolli avanzati della ricerca scientifica in un servizio di validazione standardizzato, accessibile e ad alto impatto commerciale.",
+      card1: "Validazione Indipendente",
+      card1Desc: "Forniamo evidenze scientifiche terze e solide per supportare ed elevare i claim di marketing dei vostri prodotti.",
+      card2: "Accelerazione del Time-to-Market",
+      card2Desc: "Riduciamo drasticamente i tempi di screening biologico grazie a un modello in vivo rapido, efficiente e scalabile.",
+      card3: "Integrazione Accademica",
+      card3Desc: "Uniamo la flessibilità di una startup con il rigore metodologico e l'accesso strumentale della ricerca universitaria."
+    },
+    methodology: {
+      title: "La Metodologia: Perché <i>Caenorhabditis elegans</i>?",
+      subtitle: "Un potente modello biologico in vivo, ampiamente validato dalla comunità scientifica internazionale, che condivide oltre il 60% dei geni associati a malattie umane.",
+      point1Title: "Efficacia pro-longevità",
+      point1Desc: "Valutazione quantitativa degli effetti di composti, alimenti e molecole sulla durata della vita ed invecchiamento sano.",
+      point2Title: "Salute Neuromuscolare",
+      point2Desc: "Analisi del declino funzionale motorio e dell'integrità muscolare indotta dall'invecchiamento.",
+      point3Title: "Resistenza allo Stress",
+      point3Desc: "Misurazione della sopravvivenza in vivo a stress ossidativo e termico indotto.",
+      advantageTitle: "I Vantaggi Chiave rispetto ad altri modelli:",
+      adv1: "Nessuna restrizione etica (modello non-mammifero)",
+      adv2: "Costi ridotti fino al 90% rispetto ai test su roditori",
+      adv3: "Risultati rapidi in pochi giorni per accelerare i tuoi claim scientifici"
+    },
+    sectors: {
+      title: "Saggi di Validazione per Settore",
+      subtitle: "Sviluppiamo protocolli di saggio personalizzati basati su <i>C. elegans</i> per rispondere alle esigenze specifiche di cinque settori chiave.",
+      sec1: "Agroalimentare",
+      sec1Desc: "Validazione di alimenti funzionali, estratti naturali e molecole bioattive complesse.",
+      sec2: "Nutraceutica",
+      sec2Desc: "Evidenze biologiche in vivo sull'efficacia di integratori alimentari e formulazioni anti-aging.",
+      sec3: "Farmaceutica",
+      sec3Desc: "Screening pre-clinico ad alta efficienza per identificare composti promettenti e testare la tossicità precoce.",
+      sec4: "Cosmetica",
+      sec4Desc: "Verifica delle proprietà protettive cellulari, antiossidanti e rigenerative degli ingredienti attivi.",
+      sec5: "Ambientale",
+      sec5Desc: "Monitoraggio ecotossicologico di acque, suolo ed effetti biologici di contaminanti emergenti.",
+      academicCardTitle: "Collaborazioni Scientifiche & Università",
+      academicCardDesc: "Siamo il partner ideale per i Gruppi di Ricerca Accademici. Offriamo accesso a protocolli standardizzati ad alta produttività, validazione di ceppi mutanti personalizzati e co-progettazione di grant di ricerca pubblici.",
+      academicCta: "Parla con il nostro Team Scientifico"
+    },
+    team: {
+      title: "Eccellenza Scientifica e Direzione Strategica",
+      subtitle: "Un team coeso che unisce competenze gestionali ed esperienza accademica internazionale d'élite.",
+      lauraRole: "Direzione Strategica e Scientifica",
+      lauraBio: "Visione strategica, supervisione scientifica, nuove partnerships, partecipazione bandi finanziamento, contatto potenziali investitori.",
+      emanuelaRole: "R&S - Area Operativa - Laboratorio",
+      emanuelaBio: "Sviluppo sperimentale, assays e validazione protocolli su <i>C. elegans</i>. Gestione strumentazione, analisi e processi tecnico-scientifici."
+    },
+    network: {
+      title: "Il Nostro Network Strategico",
+      subtitle: "La forza del nostro ecosistema risiede in una solida rete di istituzioni accademiche di livello globale e consulenti di fama internazionale.",
+      umgTitle: "Università Magna Graecia",
+      umgDesc: "Sede operativa delle attività e partner infrastrutturale chiave, che mette a disposizione laboratori avanzati, attrezzature e competenze specialistiche.",
+      advisorsTitle: "Advisory Board Internazionale",
+      advisorsDesc: "Supporto scientifico continuo garantito da ricercatori di spicco globale, tra cui il Prof. Daniele Bano (DZNE, Bonn) e la Prof.ssa Lene J. Rasmussen (Centro per l'Invecchiamento Sano dell'Università di Copenaghen)."
+    },
+    contact: {
+      title: "Inizia la Tua Validazione Scientifica",
+      subtitle: "Raccontaci le esigenze del tuo progetto. Il nostro team formulerà un disegno di saggio personalizzato o proporrà un accordo di partnership accademica.",
+      name: "Nome e Cognome / Referente",
+      email: "Indirizzo Email",
+      orgType: "Tipo di Organizzazione",
+      orgPlaceholder: "Seleziona opzione",
+      company: "Azienda / Società",
+      academy: "Ente di Ricerca / Università",
+      sector: "Settore di Interesse",
+      message: "Descrivi brevemente il tuo progetto o composto",
+      submit: "Invia Messaggio",
+      success: "Grazie! Il tuo messaggio è stato inviato con successo. Ti risponderemo entro 24-48 ore."
+    },
+    footer: {
+      legal: "MedLongevity Biotech Srls — Startup Innovativa."
+    }
+  },
+  en: {
+    nav: {
+      services: "Services",
+      model: "The Model",
+      team: "Team",
+      network: "Network",
+      contact: "Contact Us",
+    },
+    hero: {
+      tagline: "SCIENTIFIC EXCELLENCE & BIOTECH INNOVATION",
+      title: "Bridging the gap between academic research and industry",
+      subtitle: "MedLongevity Biotech Srls provides independent scientific validation services for enterprises and academic research groups operating in the agro-food, nutraceutical, pharmaceutical, cosmetic, and environmental sectors.",
+      ctaPrimary: "Request a Consultation",
+      ctaSecondary: "Discover the biological model",
+    },
+    valueProp: {
+      title: "Our Core Value Proposition",
+      subtitle: "We translate advanced academic scientific protocols into standardized, accessible validation services with high market value.",
+      card1: "Independent Validation",
+      card1Desc: "We deliver solid, third-party biological evidence to substantiate and elevate your product marketing claims.",
+      card2: "Accelerated Time-to-Market",
+      card2Desc: "We dramatically reduce biological screening times using a rapid, cost-efficient, and scalable in vivo model.",
+      card3: "Academic Integration",
+      card3Desc: "We combine startup agility with rigorous methodology and state-of-the-art university instrumentation access."
+    },
+    methodology: {
+      title: "The Methodology: Why <i>Caenorhabditis elegans</i>?",
+      subtitle: "A powerful in vivo biological model, highly validated by the global scientific community, sharing over 60% of genes associated with human diseases.",
+      point1Title: "Pro-longevity Efficacy",
+      point1Desc: "Quantitative assessment of the effects of compounds, nutrients, and molecules on lifespan and healthy aging.",
+      point2Title: "Neuromuscular Health",
+      point2Desc: "Analysis of motor functional decline and muscle integrity preservation during the aging process.",
+      point3Title: "Stress Resistance",
+      point3Desc: "In vivo survival measurements under induced oxidative and thermal stress conditions.",
+      advantageTitle: "Key Advantages over other models:",
+      adv1: "No ethical restrictions (non-mammalian model)",
+      adv2: "Costs reduced by up to 90% compared to rodent testing",
+      adv3: "Rapid results generated in days to fast-track your scientific claims"
+    },
+    sectors: {
+      title: "Validation Assays by Sector",
+      subtitle: "We develop custom assay protocols based on <i>C. elegans</i> to meet the specific requirements of five key sectors.",
+      sec1: "Agro-food",
+      sec1Desc: "Validation of functional foods, natural extracts, and complex bioactive compounds.",
+      sec2: "Nutraceuticals",
+      sec2Desc: "In vivo biological evidence on the efficacy of dietary supplements and anti-aging formulations.",
+      sec3: "Pharmaceuticals",
+      sec3Desc: "High-efficiency pre-clinical screening to identify promising compounds and test early-stage toxicity.",
+      sec4: "Cosmetics",
+      sec4Desc: "Evaluation of cellular protection, antioxidant capacity, and regenerative properties of active ingredients.",
+      sec5: "Environmental",
+      sec5Desc: "Ecotoxicological monitoring of water, soil, and the biological effects of emerging contaminants.",
+      academicCardTitle: "Scientific Collaborations & Academia",
+      academicCardDesc: "We are the ideal partner for Academic Research Groups. We offer access to high-throughput standardized protocols, validation of customized mutant strains, and co-design of public research grants.",
+      academicCta: "Connect with our Scientific Team"
+    },
+    team: {
+      title: "Scientific Excellence and Strategic Direction",
+      subtitle: "A highly aligned team merging management skills with elite international academic experience.",
+      lauraRole: "Strategic and Scientific Direction",
+      lauraBio: "Strategic vision, scientific supervision, new partnerships, participation in funding calls, contact with potential investors.",
+      emanuelaRole: "R&D - Operations - Laboratory",
+      emanuelaBio: "Experimental development, assays and validation of protocols on <i>C. elegans</i>. Instrumentation management, analysis, and technical-scientific processes."
+    },
+    network: {
+      title: "Our Strategic Network",
+      subtitle: "The strength of our ecosystem lies in a solid network of global academic institutions and world-renowned advisors.",
+      umgTitle: "Magna Graecia University",
+      umgDesc: "Operational headquarters and key infrastructure partner, providing advanced laboratories, equipment, and highly specialized expertise.",
+      advisorsTitle: "International Advisory Board",
+      advisorsDesc: "Continuous scientific support ensured by prominent global researchers, including Prof. Daniele Bano (DZNE, Bonn) and Prof. Lene J. Rasmussen (Center for Healthy Aging, University of Copenhagen)."
+    },
+    contact: {
+      title: "Initiate Your Scientific Validation",
+      subtitle: "Tell us about your project requirements. Our team will design a customized assay layout or propose an academic partnership agreement.",
+      name: "Full Name / Representative",
+      email: "Email Address",
+      orgType: "Organization Type",
+      orgPlaceholder: "Select option",
+      company: "Company / Business",
+      academy: "Research Institute / Academy",
+      sector: "Sector of Interest",
+      message: "Briefly describe your project or compound",
+      submit: "Submit Request",
+      success: "Thank you! Your message has been sent successfully. We will get back to you within 24-48 hours."
+    },
+    footer: {
+      legal: "MedLongevity Biotech Srls — Innovative Startup."
+    }
+  }
 }
 
-.container{
-max-width:700px;
-padding:40px;
+export default function Page() {
+  const [lang, setLang] = useState<'it' | 'en'>('it')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [orgType, setOrgType] = useState('')
+
+  const t = translations[lang]
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormSubmitted(true)
+    setTimeout(() => {
+      setFormSubmitted(false)
+    }, 6000)
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans scroll-smooth">
+      
+      {/* 1. NAVBAR */}
+      <nav className="sticky top-0 z-50 bg-[#0a192f] text-white border-b border-slate-800 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            
+            {/* LOGO PERSONALIZZATO - SOLO TESTO SU RICHIESTA */}
+            <div className="flex items-center gap-3">
+              <div>
+                <span className="font-bold text-lg tracking-wider text-white">MedLongevity</span>
+                <span className="block text-xs text-[#8fbc8f] font-mono tracking-widest uppercase">Biotech</span>
+              </div>
+            </div>
+
+            {/* NAV LINKS DESKTOP */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#servizi" className="hover:text-[#8fbc8f] transition-colors text-sm font-medium">{t.nav.services}</a>
+              <a href="#modello" className="hover:text-[#8fbc8f] transition-colors text-sm font-medium">{t.nav.model}</a>
+              <a href="#team" className="hover:text-[#8fbc8f] transition-colors text-sm font-medium">{t.nav.team}</a>
+              <a href="#network" className="hover:text-[#8fbc8f] transition-colors text-sm font-medium">{t.nav.network}</a>
+              
+              {/* LANGUAGE TOGGLE BUTTON */}
+              <button 
+                onClick={() => setLang(lang === 'it' ? 'en' : 'it')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800 text-xs font-semibold hover:bg-slate-700 hover:border-[#64ffda] transition-all"
+              >
+                <Globe className="h-3.5 w-3.5 text-[#64ffda]" />
+                <span className="uppercase">{lang === 'it' ? 'EN' : 'IT'}</span>
+              </button>
+
+              <a 
+                href="#contatti" 
+                className="bg-[#8fbc8f] text-[#0a192f] hover:bg-[#a3cfa3] px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition-all duration-200"
+              >
+                {t.nav.contact}
+              </a>
+            </div>
+
+            {/* MOBILE TOGGLE */}
+            <div className="md:hidden flex items-center gap-4">
+              <button 
+                onClick={() => setLang(lang === 'it' ? 'en' : 'it')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-700 bg-slate-800 text-xs font-semibold"
+              >
+                <Globe className="h-3.5 w-3.5 text-[#64ffda]" />
+                <span className="uppercase">{lang === 'it' ? 'EN' : 'IT'}</span>
+              </button>
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white hover:text-[#8fbc8f]">
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* NAV LINKS MOBILE POPUP */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[#0c1e35] px-4 pt-2 pb-6 space-y-3 border-t border-slate-800">
+            <a href="#servizi" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-white">{t.nav.services}</a>
+            <a href="#modello" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-white">{t.nav.model}</a>
+            <a href="#team" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-white">{t.nav.team}</a>
+            <a href="#network" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-300 hover:text-white">{t.nav.network}</a>
+            <a 
+              href="#contatti" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className="block text-center bg-[#8fbc8f] text-[#0a192f] py-3 rounded-lg font-bold"
+            >
+              {t.nav.contact}
+            </a>
+          </div>
+        )}
+      </nav>
+
+      {/* 2. HERO SECTION */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#0a192f] to-[#112240] text-white py-24 lg:py-32">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          {/* Scientific background vector wave grid decoration */}
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#64ffda" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div className="lg:col-span-7 space-y-6">
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-[#64ffda] border border-emerald-500/20 uppercase tracking-widest">
+                {t.hero.tagline}
+              </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+                {t.hero.title}
+              </h1>
+              <p className="text-lg text-slate-300 max-w-2xl">
+                {t.hero.subtitle}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <a 
+                  href="#contatti" 
+                  className="bg-[#8fbc8f] text-[#0a192f] hover:bg-[#a3cfa3] px-8 py-4 rounded-xl text-base font-bold text-center shadow-lg transition-all duration-200"
+                >
+                  {t.hero.ctaPrimary}
+                </a>
+                <a 
+                  href="#modello" 
+                  className="border border-slate-700 bg-slate-900/50 hover:bg-slate-900 hover:border-[#64ffda] text-white px-8 py-4 rounded-xl text-base font-bold text-center transition-all duration-200"
+                >
+                  {t.hero.ctaSecondary}
+                </a>
+              </div>
+            </div>
+
+            {/* Circular Biotech Illustration */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full border border-emerald-500/20 bg-slate-900/40 p-8 flex items-center justify-center shadow-2xl animate-pulse">
+                <div className="absolute inset-0 rounded-full border border-[#64ffda]/10 transform scale-110"></div>
+                <div className="absolute inset-0 rounded-full border border-[#8fbc8f]/10 transform scale-125"></div>
+                
+                {/* Microscopic C. elegans SVG representation */}
+                <svg className="w-5/6 h-5/6 opacity-90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 50 Q30 35 50 50 T90 50" stroke="#64ffda" strokeWidth="4" strokeLinecap="round" fill="none"></path>
+                  <path d="M15 65 Q35 50 55 65 T95 65" stroke="#8fbc8f" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+                  <circle cx="50" cy="50" r="1.5" fill="#64ffda" className="animate-ping"></circle>
+                  <circle cx="28" cy="42" r="1" fill="#8fbc8f"></circle>
+                  <circle cx="72" cy="58" r="1" fill="#8fbc8f"></circle>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 3. VALUE PROPOSITION SECTION */}
+      <section className="py-20 lg:py-28 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0a192f]">
+              {t.valueProp.title}
+            </h2>
+            <p className="text-lg text-slate-600">
+              {t.valueProp.subtitle}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div className="bg-slate-50 border border-slate-150 rounded-2xl p-8 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                <ShieldCheck className="h-6 w-6 text-[#8fbc8f]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0a192f] mb-3">{t.valueProp.card1}</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">{t.valueProp.card1Desc}</p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-150 rounded-2xl p-8 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                <ArrowRight className="h-6 w-6 text-[#64ffda]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0a192f] mb-3">{t.valueProp.card2}</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">{t.valueProp.card2Desc}</p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-150 rounded-2xl p-8 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                <GraduationCap className="h-6 w-6 text-indigo-500" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0a192f] mb-3">{t.valueProp.card3}</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">{t.valueProp.card3Desc}</p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. METHODOLOGY SECTION */}
+      <section id="modello" className="py-20 lg:py-28 bg-[#0a192f] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div className="lg:col-span-7 space-y-6">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white" dangerouslySetInnerHTML={{ __html: t.methodology.title }}></h2>
+              <p className="text-lg text-slate-300">
+                {t.methodology.subtitle}
+              </p>
+
+              <div className="space-y-4 pt-4">
+                
+                <div className="flex gap-4">
+                  <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-[#8fbc8f]" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white text-base">{t.methodology.point1Title}</h4>
+                    <p className="text-slate-400 text-sm">{t.methodology.point1Desc}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-[#8fbc8f]" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white text-base">{t.methodology.point2Title}</h4>
+                    <p className="text-slate-400 text-sm">{t.methodology.point2Desc}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-[#8fbc8f]" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white text-base">{t.methodology.point3Title}</h4>
+                    <p className="text-slate-400 text-sm">{t.methodology.point3Desc}</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 bg-[#112240] border border-slate-800 rounded-3xl p-8 space-y-6">
+              <h3 className="text-xl font-bold text-[#64ffda]">{t.methodology.advantageTitle}</h3>
+              
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-[#8fbc8f] mt-0.5 flex-shrink-0" />
+                  <span className="text-slate-200 text-sm">{t.methodology.adv1}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-[#8fbc8f] mt-0.5 flex-shrink-0" />
+                  <span className="text-slate-200 text-sm">{t.methodology.adv2}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-[#8fbc8f] mt-0.5 flex-shrink-0" />
+                  <span className="text-slate-200 text-sm">{t.methodology.adv3}</span>
+                </li>
+              </ul>
+
+              <div className="border-t border-slate-800 pt-6 flex items-center gap-4 text-xs font-mono text-slate-400">
+                <Beaker className="h-5 w-5 text-[#64ffda]" />
+                <span>Model Organism: <i>C. elegans</i> in biological essays</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* 5. SECTORS AND SERVICES SECTION */}
+      <section id="servizi" className="py-20 lg:py-28 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0a192f]">
+              {t.sectors.title}
+            </h2>
+            <p className="text-lg text-slate-600" dangerouslySetInnerHTML={{ __html: t.sectors.subtitle }}></p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono text-emerald-600 font-semibold uppercase tracking-wider block mb-2">01. Food</span>
+                <h3 className="text-lg font-bold text-[#0a192f] mb-3">{t.sectors.sec1}</h3>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.sectors.sec1Desc}</p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono text-emerald-600 font-semibold uppercase tracking-wider block mb-2">02. Nutraceutical</span>
+                <h3 className="text-lg font-bold text-[#0a192f] mb-3">{t.sectors.sec2}</h3>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.sectors.sec2Desc}</p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono text-emerald-600 font-semibold uppercase tracking-wider block mb-2">03. Pharma</span>
+                <h3 className="text-lg font-bold text-[#0a192f] mb-3">{t.sectors.sec3}</h3>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.sectors.sec3Desc}</p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono text-emerald-600 font-semibold uppercase tracking-wider block mb-2">04. Cosmetic</span>
+                <h3 className="text-lg font-bold text-[#0a192f] mb-3">{t.sectors.sec4}</h3>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.sectors.sec4Desc}</p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono text-emerald-600 font-semibold uppercase tracking-wider block mb-2">05. Bio-Tech</span>
+                <h3 className="text-lg font-bold text-[#0a192f] mb-3">{t.sectors.sec5}</h3>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.sectors.sec5Desc}</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* DUAL TARGET: ACADEMIC CARD */}
+          <div className="mt-12 bg-gradient-to-r from-[#112240] to-[#0a192f] text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-800">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-8 space-y-4">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-6 w-6 text-[#64ffda]" />
+                  <span className="text-xs font-mono font-bold tracking-widest text-[#64ffda] uppercase">Academic Partnership</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold">{t.sectors.academicCardTitle}</h3>
+                <p className="text-slate-300 text-base max-w-3xl">
+                  {t.sectors.academicCardDesc}
+                </p>
+              </div>
+              <div className="lg:col-span-4 flex justify-start lg:justify-end">
+                <a 
+                  href="#contatti" 
+                  onClick={() => setOrgType('academy')}
+                  className="bg-transparent border border-[#64ffda] text-[#64ffda] hover:bg-[#64ffda]/10 px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all duration-200"
+                >
+                  {t.sectors.academicCta}
+                  <ChevronRight className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6. TEAM SECTION */}
+      <section id="team" className="py-20 lg:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0a192f]">
+              {t.team.title}
+            </h2>
+            <p className="text-lg text-slate-600">
+              {t.team.subtitle}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+            
+            {/* PROFILE: LAURA BERLIOCCHI */}
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200 flex flex-col justify-between items-center text-center hover:shadow-md transition-all">
+              <div className="space-y-4">
+                {/* Riquadro vuoto per foto - inseribile in seguito */}
+                <div className="w-40 h-40 rounded-2xl border-2 border-dashed border-slate-300 mx-auto bg-slate-100 flex items-center justify-center">
+                  <span className="text-xs text-slate-400 font-mono">[Foto]</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#0a192f]">Prof.ssa Laura Berliocchi</h3>
+                  <span className="text-sm font-semibold text-emerald-700 tracking-wide block mt-1">{t.team.lauraRole}</span>
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed max-w-md mx-auto">
+                  {t.team.lauraBio}
+                </p>
+              </div>
+              <div className="mt-6 flex gap-2 font-mono text-xs text-slate-400">
+                <span>PhD, MSc — Academic Senior Expert</span>
+              </div>
+            </div>
+
+            {/* PROFILE: EMANUELA GRILLO */}
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200 flex flex-col justify-between items-center text-center hover:shadow-md transition-all">
+              <div className="space-y-4">
+                {/* Riquadro vuoto per foto - inseribile in seguito */}
+                <div className="w-40 h-40 rounded-2xl border-2 border-dashed border-slate-300 mx-auto bg-slate-100 flex items-center justify-center">
+                  <span className="text-xs text-slate-400 font-mono">[Foto]</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#0a192f]">Dott.ssa Emanuela Grillo</h3>
+                  <span className="text-sm font-semibold text-emerald-700 tracking-wide block mt-1">{t.team.emanuelaRole}</span>
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed max-w-md mx-auto" dangerouslySetInnerHTML={{ __html: t.team.emanuelaBio }}></p>
+              </div>
+              <div className="mt-6 flex gap-2 font-mono text-xs text-slate-400">
+                <span>PhD Candidate — <i>C. elegans</i> Specialist</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* 7. STRATEGIC NETWORK */}
+      <section id="network" className="py-20 lg:py-28 bg-slate-50 border-t border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0a192f]">
+              {t.network.title}
+            </h2>
+            <p className="text-lg text-slate-600">
+              {t.network.subtitle}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <Building className="h-6 w-6 text-emerald-700" />
+                <h3 className="text-xl font-bold text-[#0a192f]">{t.network.umgTitle}</h3>
+              </div>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                {t.network.umgDesc}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <Globe className="h-6 w-6 text-[#64ffda]" />
+                <h3 className="text-xl font-bold text-[#0a192f]">{t.network.advisorsTitle}</h3>
+              </div>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                {t.network.advisorsDesc}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* 8. CONTACT FORM WITH ORGANIZATION TYPE SELECTOR */}
+      <section id="contatti" className="py-20 lg:py-28 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0a192f]">{t.contact.title}</h2>
+            <p className="text-lg text-slate-600">{t.contact.subtitle}</p>
+            {/* Email di contatto diretta */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-700 mt-2 hover:bg-slate-200 transition-colors">
+              <Mail className="h-4 w-4 text-[#8fbc8f]" />
+              <a href="mailto:info@medlongevitybiotech.com" className="hover:text-[#0a192f] transition-colors">
+                info@medlongevitybiotech.com
+              </a>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-xl">
+            {formSubmitted ? (
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto text-emerald-600">
+                  <CheckCircle2 className="h-10 w-10" />
+                </div>
+                <p className="text-lg font-semibold text-[#0a192f]">
+                  {t.contact.success}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="space-y-6">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#0a192f] mb-1.5">{t.contact.name}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-[#8fbc8f] focus:ring-1 focus:ring-[#8fbc8f] transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#0a192f] mb-1.5">{t.contact.email}</label>
+                    <input 
+                      type="email" 
+                      required 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-[#8fbc8f] focus:ring-1 focus:ring-[#8fbc8f] transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#0a192f] mb-1.5">{t.contact.orgType}</label>
+                    <select 
+                      value={orgType}
+                      onChange={(e) => setOrgType(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-[#8fbc8f] focus:ring-1 focus:ring-[#8fbc8f] transition appearance-none"
+                    >
+                      <option value="">{t.contact.orgPlaceholder}</option>
+                      <option value="company">{t.contact.company}</option>
+                      <option value="academy">{t.contact.academy}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#0a192f] mb-1.5">{t.contact.sector}</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. Agro-food, Cosmetic..."
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-[#8fbc8f] focus:ring-1 focus:ring-[#8fbc8f] transition"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[#0a192f] mb-1.5">{t.contact.message}</label>
+                  <textarea 
+                    rows={4} 
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-[#8fbc8f] focus:ring-1 focus:ring-[#8fbc8f] transition"
+                  ></textarea>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="w-full bg-[#0a192f] text-white hover:bg-[#112240] py-4 rounded-xl font-bold shadow-md transition-all duration-200"
+                >
+                  {t.contact.submit}
+                </button>
+
+              </form>
+            )}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 9. FOOTER SECTION */}
+      <footer className="bg-[#0a192f] text-slate-400 py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-between">
+            <div className="space-y-2">
+              <span className="font-bold text-white text-base">MedLongevity Biotech</span>
+              <p className="text-xs text-slate-500">
+                {t.footer.legal} | Sede Operativa: Università Magna Graecia di Catanzaro.
+              </p>
+              {/* Riferimento Email nel footer */}
+              <p className="text-xs text-slate-400">
+                Email: <a href="mailto:info@medlongevitybiotech.com" className="hover:text-white transition-colors underline">info@medlongevitybiotech.com</a>
+              </p>
+            </div>
+            <div className="flex md:justify-end gap-6 text-xs font-medium text-slate-400">
+              <span>Srls</span>
+              <span>© 2026</span>
+              <span>All rights reserved</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  )
 }
-
-.logo{
-font-size:44px;
-font-weight:bold;
-margin-bottom:20px;
-letter-spacing:1px;
-}
-
-h1{
-font-size:52px;
-margin-bottom:20px;
-}
-
-p{
-font-size:20px;
-line-height:1.7;
-color:#dbeafe;
-}
-
-.button{
-display:inline-block;
-margin-top:40px;
-padding:15px 30px;
-background:#00d4ff;
-color:#001428;
-text-decoration:none;
-border-radius:12px;
-font-weight:bold;
-transition:0.3s;
-}
-
-.button:hover{
-transform:scale(1.05);
-}
-
-.footer{
-margin-top:60px;
-font-size:14px;
-color:#94a3b8;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<div class="logo">
-MEDLONGEVITY BIOTECH
-</div>
-
-<h1>Website Coming Soon</h1>
-
-<p>
-Scientific validation services for longevity, healthy aging and anti-aging innovation using the <b>C. elegans</b> in vivo model.
-</p>
-
-<p>
-Our website is currently under development and will be available soon.
-</p>
-
-<a class="button" href="mailto:info@medlongevitybiotech.com">
-Contact Us
-</a>
-
-<div class="footer">
-© 2026 MedLongevity Biotech
-</div>
-
-</div>
-
-</body>
-</html>
